@@ -1,9 +1,9 @@
 # BigQuery Style Guide
 
-## written by Jaeseok Park (jaeseok.park@gmail.com)
+#### written by Jaeseok Park (jaeseok.park@gmail.com)
 
 - [BigQuery Style Guide](#bigquery-style-guide)
-  - [written by Jaeseok Park (jaeseok.park@gmail.com)](#written-by-jaeseok-park-jaeseokparkgmailcom)
+      - [written by Jaeseok Park (jaeseok.park@gmail.com)](#written-by-jaeseok-park-jaeseokparkgmailcom)
   - [일반 원칙 (_General Principle_)](#일반-원칙-general-principle)
     - [핵심원칙 (_core principle_)](#핵심원칙-core-principle)
     - [기본 스타일 가이드 (_basic style guide_)](#기본-스타일-가이드-basic-style-guide)
@@ -29,9 +29,9 @@
     - [GROUP BY 절](#group-by-절)
     - [공통 테이블 표현식 _Common Table Expression, CTEs_](#공통-테이블-표현식-common-table-expression-ctes)
     - [Join 절](#join-절)
-      - [참고 (_references_)](#참고-references-1)
   - [Window Function](#window-function)
   - [User Defined Function](#user-defined-function)
+  - [참고 (_references_)](#참고-references-1)
 
 이 문서에서는 빅데이터를 다루는 엔지니어(data engineer)와 데이터 분석가(data analyst), 데이터 과학자(data scientist)가 BigQuery 언어로 코드 작성시의 지침(guide)과 스타일(style)을 제시하고 있다.
 
@@ -815,17 +815,17 @@ SELECT DISTINCT
  ORDER BY Chr, Start
 ;
 ```
-
-#### 참고 (_references_)
-
-- [SQL Style Guide](https://www.sqlstyle.guide/)
-- [Mazur's SQL Style Guide](https://github.com/mattm/sql-style-guide)
-- [Kickstarter SQL Style Guide](https://gist.github.com/fredbenenson/7bb92718e19138c20591)
-- [GitLab SQL Style Guide](https://about.gitlab.com/handbook/business-ops/data-team/platform/sql-style-guide/)
-
 ----
 ## Window Function
 `TBD`
 
 ## User Defined Function
 `TBD`
+
+---
+## 참고 (_references_)
+
+- [SQL Style Guide](https://www.sqlstyle.guide/)
+- [Mazur's SQL Style Guide](https://github.com/mattm/sql-style-guide)
+- [Kickstarter SQL Style Guide](https://gist.github.com/fredbenenson/7bb92718e19138c20591)
+- [GitLab SQL Style Guide](https://about.gitlab.com/handbook/business-ops/data-team/platform/sql-style-guide/)
