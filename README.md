@@ -10,7 +10,7 @@
     - [공통 스타일 가이드 (_common style guide_)](#공통-스타일-가이드-common-style-guide)
     - [스타일 가이드를 적용한 예시 (_examples_)](#스타일-가이드를-적용한-예시-examples)
   - [이름짓기와 사용하기 (_Naming Conventions_)](#이름짓기와-사용하기-naming-conventions)
-    - [이름 기본 가이드](#이름-기본-가이드)
+    - [명명 기본 가이드](#명명-기본-가이드)
     - [기타 스타일 가이드](#기타-스타일-가이드)
     - [참고 (_references_)](#참고-references)
   - [컬럼 이름 짓기와 사용하기 (_Column Naming_)](#컬럼-이름-짓기와-사용하기-column-naming)
@@ -18,6 +18,7 @@
       - [접두어와 접미어 (_prefix, suffix_)](#접두어와-접미어-prefix-suffix)
       - [컬럼 별칭 (_column_alias_)](#컬럼-별칭-column_alias)
   - [테이블 이름 짓기와 사용하기 (_Table Naming_)](#테이블-이름-짓기와-사용하기-table-naming)
+    - [테이블 이름 기본 가이드](#테이블-이름-기본-가이드)
   - [문장 구조화 하기 (_Statement Structure_)](#문장-구조화-하기-statement-structure)
     - [SELECT 컬럼 리스트](#select-컬럼-리스트)
       - [앞선 쉼표와 뒤따르는 쉼표 (_leading comma vs. trailing comma_)](#앞선-쉼표와-뒤따르는-쉼표-leading-comma-vs-trailing-comma)
@@ -30,15 +31,15 @@
     - [GROUP BY 절](#group-by-절)
     - [공통 테이블 표현식 _Common Table Expressions, CTEs_](#공통-테이블-표현식-common-table-expressions-ctes)
       - [CTE 기본 가이드](#cte-기본-가이드)
-    - [Join 절](#join-절)
+    - [JOIN 절](#join-절)
       - [JOIN 기본 가이드](#join-기본-가이드)
       - [상관 크로스 조인 (_correlated cross-join_)](#상관-크로스-조인-correlated-cross-join)
-  - [통합 예시](#통합-예시)
   - [Window Function](#window-function)
     - [윈도우 함수 기본 스타일 가이드](#윈도우-함수-기본-스타일-가이드)
   - [User Defined Function](#user-defined-function)
     - [사용자 정의 함수 스타일 예시](#사용자-정의-함수-스타일-예시)
   - [BigQuery Scripting](#bigquery-scripting)
+  - [BigQuery 스타일 예시](#bigquery-스타일-예시)
   - [참고 (_references_)](#참고-references-1)
 
 ----
@@ -50,15 +51,16 @@
 - 읽기 쉽고 유지보수가 용이한 코드를 최우선으로 한다.
 - 문장 구조와 코드 스타일의 일관성을 유지하여 가독성이 높은 코드가 되도록 한다.
 - 중언부언이나 군더더기 없는 간결한 코드가 되도록 힘쓴다. (reduce duplication and redundancy to make your code succinct)
-- 코드만으로 표현하지 못하는 맥락은 주석을 이용하여 이해를 돕는다.
+- 코드만으로 표현하지 못하는 맥락은 주석을 추가하여 이해를 돕는다.
 
 ### 공통 스타일 가이드 (_common style guide_)
 - 줄바꿈과 들여쓰기를 적절히 사용하여 문장이 의미 단위로 읽힐 수 있도록 만든다.
-- 문장(statement)의 각 절(clause)은 새로운 라인에서 시작하며 각 절의 시작 키워드가 오른쪽 정렬이 되도록 한다. `DDL`(Data Definition Language)문은 예외적으로 왼쪽으로 정렬시킨다.
-- 줄바꿈이 지나쳐 좁고 길쭉한 (*skinny*) 구조가 되는 경우 연관된 코드 뭉치를 하나의 라인으로 합칠 수 있다. 
-- 반대로 한 라인의 길이가 80 글자 내외의 시야 범위를 넘어서는 경우 줄바꿈을 통해 가로가 지나치게 길어지지 (*flat and wide*) 않도록 폭을 유지한다.
 - 들여쓰기는 탭이 아닌 공백을 이용하며 2칸 들여쓰기를 기본으로 한다.
-- 언어에서 제공하는 장치들을 이용하여 반복을 최소화한다. 공통 테이블 표현식 CTE(Common Table Expression)와 사용자 정의 함수 UDF(User Defined Function) 등은 코드의 모듈화를 돕는 장치들로 중복을 제거하는데 유용하다.
+- 문장(statement)의 각 절(clause)은 새로운 라인에서 시작하며 각 절의 시작 키워드가 오른쪽 정렬이 되도록 한다.
+  - `DDL`(Data Definition Language) 문은 예외적으로 왼쪽으로 정렬시킨다.
+- 줄바꿈이 지나쳐 좁고 길쭉한 (*skinny*) 구조가 되는 경우 연관된 코드 뭉치를 하나의 라인으로 합칠 수 있다. 
+- 반대로 한 라인의 길이가 80 글자 내외의 시야 범위를 넘어서는 경우 가로로 지나치게 길어지지 (*flat and wide*) 않도록 줄바꿈을 통해 적절한 폭을 유지한다.
+- 언어에서 제공하는 장치들을 이용하여 반복을 최소화한다. **공통 테이블 표현식** `CTE(Common Table Expression)`과 **사용자 정의 함수** `UDF(User Defined Function)` 등은 코드의 모듈화를 돕는 장치들로 중복을 제거하는데 유용하다.
 
 ### 스타일 가이드를 적용한 예시 (_examples_)
 SQL 문장은 아래와 같이 세분화할 수 있다. 각 문장에 대해 스타일 가이드를 적용한 예시들을 몇가지 살펴보도록 하자.
@@ -66,19 +68,19 @@ SQL 문장은 아래와 같이 세분화할 수 있다. 각 문장에 대해 스
 - `SEL` statement - `SELECT`
 - `DDL`(Data Definition Language) statement - `CREATE`, `ALTER`, `DROP`
 - `DML`(Data Manipulation Language) statement - `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `MERGE`
-- `DCL`(Data Constraint Language) statement - BigQuery에서는 Data Constraint Language 구문를 지원하지 않음.
+- `DCL`(Data Constraint Language) statement - BigQuery에서는 Data Constraint Language 구문를 지원하지 않는다.
 
 `SELECT`는 `DML`의 한 종류이지만 다른 `DML` 문과 달리 테이블의 내용을 변경하지 않는다는 점에서 구분되기도 한다.
 
 - `SELECT` statement 예시
 
 ```sql
-/* SELECT 쿼리 예시 */
+/* 각 절의 시작 키워드인 SELECT, FROM, LEFT, WHERE, GROUP 등을 오른쪽 정렬 */
 SELECT station_id,
        name,
        status,
        latitude, longitude,  -- 연관 컬럼들을 같은 라인에 나열하는 것도 가능
-       ST_DISTANCE (
+       ST_DISTANCE(
          ST_GEOGPOINT(longitude, latitude), ST_GEOGPOINT(-0.118092, 51.509865)
        ) AS distance_from_city_centre,
        COUNT(1) AS cnt,
@@ -101,9 +103,9 @@ HAVING cnt > 1
 -- https://cloud.google.com/bigquery/docs/reference/standard-sql/data-definition-language#creating_a_new_table
 
 CREATE TABLE my_dataset.new_table (
-  x INT64 OPTIONS(description = 'An optional INTEGER field'),
+  x INT64 OPTIONS (description = 'An optional INTEGER field'),
   y STRUCT<
-    a ARRAY<STRING> OPTIONS(description = 'A repeated STRING field'),
+    a ARRAY<STRING> OPTIONS (description = 'A repeated STRING field'),
     b BOOL
   >,
 )
@@ -172,43 +174,36 @@ MERGE dataset.DetailedInventory T
 USING dataset.Inventory S
    ON T.product = S.product
  WHEN NOT MATCHED AND quantity < 20 THEN 
-      INSERT(product, quantity, supply_constrained, comments)
-      VALUES(product, quantity, true, 
-             ARRAY<STRUCT<created DATE, comment STRING>>[
-               (DATE('2016-01-01'), 'comment1')
-             ])
+      INSERT (product, quantity, supply_constrained, comments)
+      VALUES (product, quantity, true, 
+              ARRAY<STRUCT<created DATE, comment STRING>>[
+                (DATE('2016-01-01'), 'comment1')
+              ]
+      )
  WHEN NOT MATCHED THEN
-      INSERT(product, quantity, supply_constrained)
-      VALUES(product, quantity, false)
+      INSERT (product, quantity, supply_constrained)
+      VALUES (product, quantity, false)
 ```
 
 ----
 ## 이름짓기와 사용하기 (_Naming Conventions_)
 
-### 이름 기본 가이드
 이 장에서는 문장을 이루는 가장 기본적인 단위인 키워드와 식별자 이름에 대한 내용을 다룬다.
+
+### 명명 기본 가이드
 
 식별자(_identifier_)는 문장내에서 유일하게 구별되어 인식되는 이름으로 아래 항목들을 포함한다.
 1. 언어의 문법구조를 기술하는 토큰(_token_) - ex. `SELECT`, `JOIN`, `FROM`, ...
 2. 테이블, 컬럼의 명칭이나 별칭(_alias_)
 3. 기본 제공 함수 또는 사용자 정의 함수 이름 - ex. `SUM()`, `STRPOS()`, ...
 
-[키워드(_keyword_)](https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical#reserved_keywords)는 예약된 식별자(_reserved identifier_) 로서 SQL 명세에 의해 그 쓰임이 이미 정해져 있는 이름을 말한다.
+[키워드(_keyword_)](https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical#reserved_keywords) 는 예약된 식별자(_reserved identifier_) 로서 SQL 명세에 의해 그 쓰임이 이미 정해져 있는 이름을 말한다.
 
-본 가이드에서는 아래 서술된 관례에 따라 이름을 정의하고 표기하도록 한다.
-- 키워드는 대문자로 그 외의 식별자는 소문자로 작성하는 것을 권장한다.
+본 가이드에서는 아래 서술된 관례에 따라 이름을 정의하고 표기하는 것을 권장한다.
+- 키워드는 대문자로 그 외의 식별자는 소문자로 작성하도록 한다.
 - 기본 제공 함수 혹은 내장 함수(_built-in function_)는 대소문자를 구분하지 않으나 대문자로 작성하는 것을 기본으로 한다.
 - 사용자 정의 함수(UDF, _user-defined function_)는 소문자를 사용하여 함수 이름을 정의하도록 한다. UDF 이름은 대소문자를 구분한다.
 - 여러 단어로 이루어진 식별자는 `camelCase`가 아닌 `snake_case`의 형태로 작성토록 한다.
-
-대소문자의 구분은 문장내에서 각 이름이 제 역할을 드러내도록 하는데 도움을 준다. 대문자 `SELECT`, `FROM` 등의 키워드는 주로 문장 구조의 표현에 사용되는데 소문자로 표기되는 개체(_entity_)나 속성(_attribute_)의 식별자 이름과 시각적으로 구분이 된다. 이는 전체적인 문장 구조의 파악을 용이하게 한다.
-
-내장 함수와 달리 사용자 정의 함수의 이름에 소문자를 사용하는 이유는 사용자 정의 함수를 영속 함수 (_persistent function_) 로 정의하는 경우 데이터셋 이름을 포함한 **한정된 함수 이름** (_qualified function name_)을 사용해야 하는데 이때 함수를 한정시키기 위해 사용하는 프로젝트 이름이나 데이터셋의 이름이 소문자로 기술되기 때문에 하나의 의미 단위내에서 대소문자가 혼용되지 않게 하기 위해서이다. 이를 통해 아래에 설명할 **FQTN (Fully Qualified Table Name)** 테이블 이름 규칙과의 일관성도 유지할 수 있다.
-
-```sql
--- 완전 한정된 함수 이름의 예 - fully qualified function name
-SELECT bqutils.fn.last_day('2021-03-07')
-```
 
 위의 관례에 따른 예시는 다음과 같다.
 
@@ -218,14 +213,30 @@ SELECT first_name, last_name FROM my_dataset.my_table
 ```
 :disappointed: 기피 (_avoid_)
 ```sql
-select firstName, lastName from myDataset.myTable
+select firstName, lastName from myDataset.myTable -- camel case 사용
 -- OR
 SELECT FIRST_NAME, LAST_NAME FROM MY_DATASET.MY_TABLE
 ```
 
+내장 함수와 달리 사용자 정의 함수의 이름에 소문자를 사용하는 이유는 다음과 같다.
+
+사용자 정의 함수를 영속 함수 (_persistent function_) 로 정의하는 경우 데이터셋 이름을 포함한 **한정된 함수 이름** (_qualified function name_)을 사용해야 한다.  이때 함수를 한정시키기 위해 사용하는 프로젝트 이름이나 데이터셋의 이름이 소문자로 작성되기 때문에 하나의 의미 단위내에서 대소문자가 혼용되지 않게 하기 위해서이다. 
+
+이를 통해 아래에 설명할 **FQTN (Fully Qualified Table Name)** 테이블 이름 규칙과의 일관성도 유지할 수 있다.
+
+```sql
+-- 완전 한정된 함수 이름의 예 - fully qualified function name
+SELECT bqutils.fn.last_day('2021-03-07')
+```
+
+대소문자의 구분은 문장내에서 각 이름이 제 역할을 드러내도록 하는데 도움을 준다. 
+
+대문자 `SELECT`, `FROM` 등의 키워드는 주로 문장 구조의 표현에 사용되는데 소문자로 표기되는 개체(_entity_)나 속성(_attribute_)의 식별자 이름과 시각적으로 구분이 된다. 이는 전체적인 문장 구조의 파악을 용이하게 한다.
+
 ### 기타 스타일 가이드
 - 키워드가 부득이하게 컬럼의 이름으로 사용되는 경우 backtick(`)을 이용하여 감싸준다 (_quoted identifiers_).
 ```sql
+-- from 예약어가 컬럼명으로 사용하는 경우
 SELECT 'asia-northeast3' AS `from` FROM ...
 ```
 - 문자열 리터럴(_string literal_)은 단일따옴표(')를 사용한다.
@@ -264,7 +275,7 @@ SELECT hits,          -- ARRAY<STRUCT<>> 형
 
 아래는 몇가지 사용 가능한 예시이다.
 
-- Boolean 형의 경우 `is_`, `has_`, 또는 `does_`의 접두어를 사용할 수 있다.
+- Boolean 형의 경우 `is_`, `has_`와 같은 접두어를 사용할 수 있다.
 - Date형은 `_dt` 접미어를 붙일 수 있다.
 - DateTime이나 Timestamp형은 `_at` 접미어가 가능하다.
 - `user_id`, `device_id` 처럼 식별자(_id_) 접미어의 사용이 가능하다.
@@ -277,7 +288,9 @@ SELECT is_active,
 ```
 
 #### 컬럼 별칭 (_column_alias_)
-컬럼의 별칭 이름은 컬럼 이름 규칙에 준하여 작성한다. 별칭은 목적에 따라서 컬럼 이름보다 상세히 작성되는 경우도 있고 반대로 간략하게 축약된 형태로 사용하기도 한다. 
+컬럼의 별칭 이름은 컬럼 이름 기본 가이드에 준하여 작성한다. 별칭 앞의 `AS` 키워드 는 생략 가능하나 본 가이드에서는 명시적으로 사용하는 것을 기본으로 한다.
+
+별칭은 목적에 따라서 컬럼 이름보다 상세히 작성되는 경우도 있고 반대로 간략하게 축약된 형태로 사용하기도 한다. 
 
 아래와 같이 컬럼의 의미를 명확하 하기 위해서는 긴 이름의 별칭을 사용할 수 있다.
 
@@ -287,7 +300,7 @@ SELECT fname AS first_name,
   FROM ...
 ```
 
-반면에 컬럼 이름이 유도된 컬럼(_derived column_) 또는 계산된 컬럼(_calculated column_)의 연산식에 반복적으로 사용되어지는 경우는 간결함을 위해서 축약된 이름을 사용할 수 있다.
+반면에 컬럼 이름이 유도된 컬럼(_derived column_) 또는 계산된 컬럼(_calculated column_)을 만들어 내는 연산식에서 반복적으로 사용되어지는 경우는 간결함을 위해서 축약된 이름을 사용하는 경우도 있다.
 
 :disappointed: 기피 (_avoid_)
 ```sql
@@ -304,7 +317,7 @@ SELECT SQRT(
        ) AS distince,  -- calculated(or derived) column
   FROM locations
 ```
-위와 같이 테이블이 가지는 기본 컬럼 (_base column_) 으로부터 새로운 컬럼을 파생시키는 연산식에서 컬럼 이름이 반복적으로 등장하여 라인이 길어지는 경우 아래와 같이 간결하게 연산식이 표현되도록 축약된 별칭을 사용하는 것이 가능하다.
+위의 예시는 테이블이 가지는 기본 컬럼 (_base column_) 으로부터 새로운 컬럼을 파생시키는 연산식에 컬럼 이름이 반복적으로 등장하여 라인이 길어지고 있다. 이를 아래와 같이 축약된 별칭을 사용하게 되면 연산식이 간결하게 표현된다.
 
 :smile: 권장 (_recommend_)
 ```sql
@@ -322,7 +335,10 @@ SELECT SQRT((cx - x) * (cx - x) + (cy - y) * (cy - y)) AS distince,
 ----
 ## 테이블 이름 짓기와 사용하기 (_Table Naming_)
 
-테이블 이름은 소문자 사용을 기본으로 하되 영구 테이블(_permanent table_)에 대한 팀내 명명 규칙이 별도로 정해져 있는 경우 그것을 우선한다.  다만, 임시테이블(_temporary table_)이나 공통 테이블 표현식(_CTEs_) 이름의 경우는 소문자를 사용하도록 한다. 테이블 이름은 대소문자를 구분한다.
+### 테이블 이름 기본 가이드
+테이블 이름은 소문자 사용을 기본으로 하되 영구 테이블(_permanent table_)에 대한 팀내 명명 규칙이 별도로 정해져 있는 경우 그것을 우선한다.  
+
+다만, 임시테이블(_temporary table_)이나 공통 테이블 표현식(_CTEs_) 이름의 경우는 소문자를 사용하도록 한다. 테이블 이름은 대소문자를 구분한다.
 
 - 여래 개의 단어를 조합하여 이름를 지을 경우 dash(-)가 아닌 underscore(_)를 사용하여 snake_case 이름이 되도록 한다.
 - 과제별 명명규칙에 의해 이미 생성되어 운영되고 있는 데이터셋과 테이블 이름들은 가이드의 권고를 따르지 않더라도 As-Is 이름을 그대로 사용토록 한다.
@@ -777,7 +793,7 @@ SELECT *
  ORDER BY distance_from_city_centre_m
 ```
 
-### Join 절
+### JOIN 절
 
 #### JOIN 기본 가이드
 - `INNER`와 `OUTER` 키워드는 생략되더라도 의미적으로 혼동을 주지 않기 때문에 생략한다. 내부조인은 `JOIN`, 외부조인은 `LEFT JOIN`, `OUTER JOIN`을 사용한다.
@@ -827,85 +843,7 @@ SELECT w, x, y_ FROM data, UNNEST(y) y_
 ```
 
 ----
-## 통합 예시
-아래는 지금까지의 가이드에 따라 실제 분석용 쿼리를 구조화한 예시이다. 쿼리는 아래 링크의 내용을 사용하였다.
-- https://cloud.google.com/life-sciences/docs/how-tos/interval-joins
 
-```sql
-#standardSQL
-WITH variants AS (
-  -- Retrieve the variants in this cohort, flattening by alternate bases and
-  -- counting affected alleles.
-  SELECT REPLACE(reference_name, 'chr', '') as reference_name,
-         start_position,
-         end_position,
-         reference_bases,
-         alternate_bases.alt AS alt,
-         (SELECT COUNTIF(gt = alt_offset + 1) FROM v.call, call.genotype gt) AS num_variant_alleles,
-         (SELECT COUNTIF(gt >= 0) FROM v.call, call.genotype gt) AS total_num_alleles,
-    FROM `bigquery-public-data.human_genome_variants.platinum_genomes_deepvariant_variants_20180823` v,
-         UNNEST(alternate_bases) alternate_bases WITH OFFSET alt_offset
-),
-intervals AS (
-  -- Define an inline table that uses five rows
-  -- selected from silver-wall-555.TuteTable.hg19.
-  SELECT * 
-    FROM UNNEST([
-           STRUCT<Gene STRING, Chr STRING, 
-                  gene_start INT64, gene_end INT64,
-                  region_start INT64, region_end INT64>
-           ('PRCC',  '1', 156736274, 156771607, 156636274, 156871607),
-           ('NTRK1', '1', 156785541, 156852640, 156685541, 156952640),
-           ('PAX8',  '2', 113972574, 114037496, 113872574, 114137496),
-           ('FHIT',  '3',  59734036,  61238131,  59634036,  61338131),
-           ('PPARG', '3',  12328349,  12476853,  12228349,  12576853)
-         ])
-),
-gene_variants AS (
-  --
-  -- JOIN the variants with the genomic intervals overlapping
-  -- the genes of interest.
-  --
-  -- The JOIN criteria is complicated because the task is to see if
-  -- an SNP overlaps an interval.  With standard SQL you can use complex
-  -- JOIN predicates, including arbitrary expressions.
-  SELECT reference_name,
-         start_position,
-         reference_bases,
-         alt,
-         num_variant_alleles,
-         total_num_alleles,
-    FROM variants v
-    JOIN intervals i
-      ON v.reference_name = i.Chr
-     AND i.region_start <= v.start_position
-     AND i.region_end >= v.end_position 
-)
---
--- And finally JOIN the variants in the regions of interest
--- with annotations for rare variants.
-SELECT DISTINCT 
-       Chr,
-       annots.Start AS Start,
-       Ref,
-       annots.Alt,
-       Func,
-       Gene,
-       PopFreqMax,
-       ExonicFunc,
-       num_variant_alleles,
-       total_num_alleles,
-  FROM `silver-wall-555.TuteTable.hg19` AS annots
-  JOIN gene_variants AS vars
-    ON vars.reference_name = annots.Chr
-   AND vars.start_position = annots.Start
-   AND vars.reference_bases = annots.Ref
-   AND vars.alt = annots.Alt
- WHERE PopFreqMax <= 0.01 -- Retrieve annotations for rare variants only.
- ORDER BY Chr, Start
-;
-```
-----
 ## Window Function
 - [Analytic Function Example](https://cloud.google.com/bigquery/docs/reference/standard-sql/analytic-function-concepts#analytic_function_examples)
 
@@ -972,7 +910,6 @@ SELECT name,
 
 ```
 
-
 ## User Defined Function
 
 BigQuery의 사용자 정의 함수는 `SQL`과 `JavaScript` 두 가지 언어로 작성 가능하다. 
@@ -1034,6 +971,86 @@ CREATE OR REPLACE FUNCTION `jaeseok-park.fn.median` (arr ANY TYPE) AS ((
 ## BigQuery Scripting
 `TBD`
 
+----
+
+## BigQuery 스타일 예시
+아래는 지금까지의 가이드에 따라 실제 분석용 쿼리를 구조화한 예시이다. 쿼리는 아래 링크의 내용을 사용하였다.
+- https://cloud.google.com/life-sciences/docs/how-tos/interval-joins
+
+```sql
+#standardSQL
+WITH variants AS (
+  -- Retrieve the variants in this cohort, flattening by alternate bases and
+  -- counting affected alleles.
+  SELECT REPLACE(reference_name, 'chr', '') as reference_name,
+         start_position,
+         end_position,
+         reference_bases,
+         alternate_bases.alt AS alt,
+         (SELECT COUNTIF(gt = alt_offset + 1) FROM v.call, call.genotype gt) AS num_variant_alleles,
+         (SELECT COUNTIF(gt >= 0) FROM v.call, call.genotype gt) AS total_num_alleles,
+    FROM `bigquery-public-data.human_genome_variants.platinum_genomes_deepvariant_variants_20180823`,
+         UNNEST(alternate_bases) alternate_bases WITH OFFSET alt_offset
+),
+intervals AS (
+  -- Define an inline table that uses five rows
+  -- selected from silver-wall-555.TuteTable.hg19.
+  SELECT * 
+    FROM UNNEST([
+           STRUCT<Gene STRING, Chr STRING, 
+                  gene_start INT64, gene_end INT64,
+                  region_start INT64, region_end INT64>
+           ('PRCC',  '1', 156736274, 156771607, 156636274, 156871607),
+           ('NTRK1', '1', 156785541, 156852640, 156685541, 156952640),
+           ('PAX8',  '2', 113972574, 114037496, 113872574, 114137496),
+           ('FHIT',  '3',  59734036,  61238131,  59634036,  61338131),
+           ('PPARG', '3',  12328349,  12476853,  12228349,  12576853)
+         ])
+),
+gene_variants AS (
+  --
+  -- JOIN the variants with the genomic intervals overlapping
+  -- the genes of interest.
+  --
+  -- The JOIN criteria is complicated because the task is to see if
+  -- an SNP overlaps an interval.  With standard SQL you can use complex
+  -- JOIN predicates, including arbitrary expressions.
+  SELECT reference_name,
+         start_position,
+         reference_bases,
+         alt,
+         num_variant_alleles,
+         total_num_alleles,
+    FROM variants v
+    JOIN intervals i
+      ON v.reference_name = i.Chr
+     AND i.region_start <= v.start_position
+     AND i.region_end >= v.end_position 
+)
+--
+-- And finally JOIN the variants in the regions of interest
+-- with annotations for rare variants.
+SELECT DISTINCT 
+       Chr,
+       annots.Start AS Start,
+       Ref,
+       annots.Alt,
+       Func,
+       Gene,
+       PopFreqMax,
+       ExonicFunc,
+       num_variant_alleles,
+       total_num_alleles,
+  FROM `silver-wall-555.TuteTable.hg19` AS annots
+  JOIN gene_variants AS vars
+    ON vars.reference_name = annots.Chr
+   AND vars.start_position = annots.Start
+   AND vars.reference_bases = annots.Ref
+   AND vars.alt = annots.Alt
+ WHERE PopFreqMax <= 0.01 -- Retrieve annotations for rare variants only.
+ ORDER BY Chr, Start
+;
+```
 ---
 ## 참고 (_references_)
 - [SQL Style Guide](https://www.sqlstyle.guide/)
