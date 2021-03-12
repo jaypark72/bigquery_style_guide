@@ -1029,13 +1029,13 @@ CREATE OR REPLACE FUNCTION `jaeseok-park.fn.median` (arr ANY TYPE) AS ((
          ) AS median
    FROM (SELECT ARRAY_AGG(x ORDER BY x) AS arr FROM UNNEST(arr) AS x)
 ));
-
+```
+----
 ## BigQuery Scripting
 `TBD`
 
 ---
 ## 참고 (_references_)
-
 - [SQL Style Guide](https://www.sqlstyle.guide/)
 - [Mazur's SQL Style Guide](https://github.com/mattm/sql-style-guide)
 - [Kickstarter SQL Style Guide](https://gist.github.com/fredbenenson/7bb92718e19138c20591)
