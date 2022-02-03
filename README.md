@@ -748,12 +748,12 @@ SELECT *
 :smile: 권장 _recommend_
 ```sql
 WITH first_subquery (  -- 가장 안쪽의 서브쿼리
-SELECT * 
-  FROM base_table
+  SELECT *
+    FROM base_table
 ),
 second_subquery ( -- 상위 서브쿼리
-SELECT *
-  FROM first_subquery
+  SELECT *
+    FROM first_subquery
 )
 SELECT *
   FROM second_subquery
