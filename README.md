@@ -1,7 +1,4 @@
 # BigQuery Style Guide
-
-■ Written by Jaeseok Park (jaeseok.park@gmail.com)
-
 ## 목차 (Table of Contents)
 - [BigQuery Style Guide](#bigquery-style-guide)
   - [목차 (Table of Contents)](#목차-table-of-contents)
@@ -45,12 +42,12 @@
 ----
 ## 일반 가이드 (_General Guide_)
 
-이 문서에서는 빅데이터를 다루는 엔지니어(data engineer), 데이터 분석가(data analyst)와 데이터 과학자(data scientist)가 BigQuery 언어로 코드 작성시의 지침(guide)과 스타일(style)을 제시하고 있다.
+이 문서는 빅데이터를 다루는 엔지니어(data engineer), 데이터 분석가(data analyst)와 데이터 과학자(data scientist)가 BigQuery 언어로 코드 작성시의 지침(guide)과 스타일(style)을 제시하고 있다.
 
 ### 핵심원칙 (_core principle_)
-- 읽기 쉽고 유지보수가 용이한 코드를 최우선으로 한다.
 - 문장 구조와 코드 스타일의 일관성을 유지하여 가독성이 높은 코드가 되도록 한다.
-- 중언부언이나 군더더기 없는 간결한 코드가 되도록 힘쓴다. (reduce duplication and redundancy to make your code succinct)
+- 읽기 쉽고 유지보수가 용이한 코드를 최우선으로 한다.
+- 중언부언이나 군더더기 없는 간결한 코드가 되도록 힘쓴다.
 - 코드만으로 표현하지 못하는 맥락은 주석을 추가하여 이해를 돕는다.
 
 ### 공통 스타일 가이드 (_common style guide_)
@@ -58,7 +55,7 @@
 - 들여쓰기는 탭이 아닌 공백을 이용하며 2칸 들여쓰기를 기본으로 한다.
 - 문장(statement)의 각 절(clause)은 새로운 라인에서 시작하며 각 절의 시작 키워드가 오른쪽 정렬이 되도록 한다.
   - `DDL`(Data Definition Language) 문은 예외적으로 왼쪽으로 정렬시킨다.
-- 줄바꿈이 지나쳐 좁고 길쭉한 (*skinny*) 구조가 되는 경우 연관된 코드 뭉치를 하나의 라인으로 합칠 수 있다. 
+- 줄바꿈이 지나쳐 좁고 길쭉한 (*skinny*) 구조가 되는 경우 연관된 코드 뭉치를 하나의 라인으로 합칠 수 있다.
 - 반대로 한 라인의 길이가 80 글자 내외의 시야 범위를 넘어서는 경우 가로로 지나치게 길어지지 (*flat and wide*) 않도록 줄바꿈을 통해 적절한 폭을 유지한다.
 - 언어에서 제공하는 장치들을 이용하여 반복을 최소화한다. **공통 테이블 표현식** `CTE(Common Table Expression)`과 **사용자 정의 함수** `UDF(User Defined Function)` 등은 코드의 모듈화를 돕는 장치들로 중복을 제거하는데 유용하다.
 
@@ -74,6 +71,8 @@ SQL 문장은 아래와 같이 세분화할 수 있다. 각 문장에 대해 스
 
 - `SELECT` statement 예시
 
+본 가이드는 SELECT 문장의 구조를 구성하는 키워드는 대문자로 오른쪽 정렬을 시키고, 비즈니스 로직은 소문자를 위주로 왼쪽 정렬시켜 문장의 구조(Syntax)와 의미(Semantics)가 구분되도록 하고 있다.
+![select_structure](./images/styling_concept.png)
 ```sql
 /* 각 절의 시작 키워드인 SELECT, FROM, LEFT, WHERE, GROUP 등을 오른쪽 정렬 */
 SELECT station_id,
@@ -96,8 +95,8 @@ HAVING cnt > 1
 ```
 
 - `DDL` statement 예시
- 
-`DDL`문은 `SEL` 문장과 달리 시작 키워드를 왼쪽으로 정렬을 시킨다. 
+
+`DDL`문은 `SEL` 문장과 달리 시작 키워드를 왼쪽으로 정렬을 시킨다.
 
 ```sql
 -- https://cloud.google.com/bigquery/docs/reference/standard-sql/data-definition-language#creating_a_new_table
@@ -123,11 +122,11 @@ OPTIONS (
 
 ALTER TABLE mydataset.mytable
 SET OPTIONS (
-  expiration_timestamp = TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 7 DAY),
-  description = "Table that expires seven days from now"
-)
+      expiration_timestamp = TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 7 DAY),
+      description = "Table that expires seven days from now"
+    )
 ;
-``` 
+```
 
 - `DML` statement 예시
 
@@ -151,10 +150,11 @@ VALUES ('top load washer', 10),
 -- https://cloud.google.com/bigquery/docs/reference/standard-sql/dml-syntax#update_using_joins
 
 UPDATE dataset.Inventory
-   SET quantity = quantity + 
-                  (SELECT quantity 
-                     FROM dataset.NewArrivals
-                    WHERE Inventory.product = NewArrivals.product),
+   SET quantity = quantity + (
+         SELECT quantity
+           FROM dataset.NewArrivals
+          WHERE Inventory.product = NewArrivals.product
+       ),
        supply_constrained = false
  WHERE product IN (SELECT product FROM dataset.NewArrivals)
 ;
@@ -173,12 +173,13 @@ UPDATE dataset.Inventory i
 MERGE dataset.DetailedInventory T
 USING dataset.Inventory S
    ON T.product = S.product
- WHEN NOT MATCHED AND quantity < 20 THEN 
+ WHEN NOT MATCHED AND quantity < 20 THEN
       INSERT (product, quantity, supply_constrained, comments)
-      VALUES (product, quantity, true, 
-              ARRAY<STRUCT<created DATE, comment STRING>>[
-                (DATE('2016-01-01'), 'comment1')
-              ]
+      VALUES (
+        product, quantity, true,
+        ARRAY<STRUCT<created DATE, comment STRING>>[
+          (DATE('2016-01-01'), 'comment1')
+        ]
       )
  WHEN NOT MATCHED THEN
       INSERT (product, quantity, supply_constrained)
@@ -201,9 +202,9 @@ USING dataset.Inventory S
 
 본 가이드에서는 아래 서술된 관례에 따라 이름을 정의하고 표기하는 것을 권장한다.
 - 키워드는 대문자로 그 외의 식별자는 소문자로 작성하도록 한다.
+- 여러 단어로 이루어진 식별자는 `camelCase`가 아닌 `snake_case`의 형태로 작성토록 한다.
 - 기본 제공 함수 혹은 내장 함수(_built-in function_)는 대소문자를 구분하지 않으나 대문자로 작성하는 것을 기본으로 한다.
 - 사용자 정의 함수(UDF, _user-defined function_)는 소문자를 사용하여 함수 이름을 정의하도록 한다. UDF 이름은 대소문자를 구분한다.
-- 여러 단어로 이루어진 식별자는 `camelCase`가 아닌 `snake_case`의 형태로 작성토록 한다.
 
 위의 관례에 따른 예시는 다음과 같다.
 
@@ -220,7 +221,7 @@ SELECT FIRST_NAME, LAST_NAME FROM MY_DATASET.MY_TABLE
 
 내장 함수와 달리 사용자 정의 함수의 이름에 소문자를 사용하는 이유는 다음과 같다.
 
-사용자 정의 함수를 영속 함수 (_persistent function_) 로 정의하는 경우 데이터셋 이름을 포함한 **한정된 함수 이름** (_qualified function name_)을 사용해야 한다.  이때 함수를 한정시키기 위해 사용하는 프로젝트 이름이나 데이터셋의 이름이 소문자로 작성되기 때문에 하나의 의미 단위내에서 대소문자가 혼용되지 않게 하기 위해서이다. 
+사용자 정의 함수를 영속 함수 (_persistent function_) 로 정의하는 경우 데이터셋 이름을 포함한 **한정된 함수 이름** (_qualified function name_)을 사용해야 한다.  이때 함수를 한정시키기 위해 사용하는 프로젝트 이름이나 데이터셋의 이름이 소문자로 작성되기 때문에 하나의 의미 단위내에서 대소문자가 혼용되지 않게 하기 위해서이다.
 
 이를 통해 아래에 설명할 **FQTN (Fully Qualified Table Name)** 테이블 이름 규칙과의 일관성도 유지할 수 있다.
 
@@ -229,7 +230,7 @@ SELECT FIRST_NAME, LAST_NAME FROM MY_DATASET.MY_TABLE
 SELECT bqutils.fn.last_day('2021-03-07')
 ```
 
-대소문자의 구분은 문장내에서 각 이름이 제 역할을 드러내도록 하는데 도움을 준다. 
+대소문자의 구분은 문장내에서 각 이름이 제 역할을 드러내도록 하는데 도움을 준다.
 
 대문자 `SELECT`, `FROM` 등의 키워드는 주로 문장 구조의 표현에 사용되는데 소문자로 표기되는 개체(_entity_)나 속성(_attribute_)의 식별자 이름과 시각적으로 구분이 된다. 이는 전체적인 문장 구조의 파악을 용이하게 한다.
 
@@ -239,7 +240,7 @@ SELECT bqutils.fn.last_day('2021-03-07')
 -- from 예약어가 컬럼명으로 사용하는 경우
 SELECT 'asia-northeast3' AS `from` FROM ...
 ```
-- 문자열 리터럴(_string literal_)은 단일따옴표(')를 사용한다.
+- 문자열 리터럴(_string literal_)은 작은따옴표(')를 사용한다.
 - 상수(_constant_)값을 갖는 변수 이름은 대문자로 한다.
 
 ```sql
@@ -260,13 +261,13 @@ DECLARE START_DATE DATE DEFAULT '2021-02-19'
 SELECT cnty_cd, mcc, mnc, csc, FROM ...
 ```
 
-배열형이나 복수의 의미를 지니는 컬럼인 경우는 이름을 복수형으로 할 수 있다. 
+배열형이나 복수의 의미를 지니는 컬럼인 경우는 이름을 복수형으로 할 수 있다.
 
 ```sql
 SELECT hits,          -- ARRAY<STRUCT<>> 형
        totals.visits, -- INT64형, 총 세션 횟수
        totals.hits,   -- INT64형, 세션내 조회수
-  FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` 
+  FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801`
 ;
 ```
 
@@ -284,23 +285,23 @@ SELECT hits,          -- ARRAY<STRUCT<>> 형
 SELECT is_active,
        registered_dt,
        updated_at,
-  FROM ...       
+  FROM ...
 ```
 
 #### 컬럼 별칭 (_column_alias_)
 컬럼의 별칭 이름은 컬럼 이름 기본 가이드에 준하여 작성한다. 별칭 앞의 `AS` 키워드 는 생략 가능하나 본 가이드에서는 명시적으로 사용하는 것을 기본으로 한다.
 
-별칭은 목적에 따라서 컬럼 이름보다 상세히 작성되는 경우도 있고 반대로 간략하게 축약된 형태로 사용하기도 한다. 
+별칭은 목적에 따라서 컬럼 이름보다 상세히 작성되는 경우도 있고 반대로 간략하게 축약된 형태로 사용하기도 한다.
 
-아래와 같이 컬럼의 의미를 명확하 하기 위해서는 긴 이름의 별칭을 사용할 수 있다.
+컬럼의 의미를 명확히 하기 위해서 아래와 같이 긴 이름의 별칭을 사용할 수 있다.
 
 ```sql
 SELECT fname AS first_name,
-       lname AS last_name,  
+       lname AS last_name,
   FROM ...
 ```
 
-반면에 컬럼 이름이 유도된 컬럼(_derived column_) 또는 계산된 컬럼(_calculated column_)을 만들어 내는 연산식에서 반복적으로 사용되어지는 경우는 간결함을 위해서 축약된 이름을 사용하는 경우도 있다.
+반면에 컬럼 이름이 유도된 컬럼(_derived column_) 또는 계산된 컬럼(_calculated column_)을 만들어 내는 연산식에서 반복적으로 사용되어지는 경우는 간결함을 위해서 축약된 이름을 사용하기도 한다.
 
 :disappointed: 기피 (_avoid_)
 ```sql
@@ -317,7 +318,7 @@ SELECT SQRT(
        ) AS distince,  -- calculated(or derived) column
   FROM locations
 ```
-위의 예시는 테이블이 가지는 기본 컬럼 (_base column_) 으로부터 새로운 컬럼을 파생시키는 연산식에 컬럼 이름이 반복적으로 등장하여 라인이 길어지고 있다. 이를 아래와 같이 축약된 별칭을 사용하게 되면 연산식이 간결하게 표현된다.
+위의 예시는 테이블이 가지는 기본 컬럼 (_base column_) 으로부터 새로운 컬럼을 파생시키는 연산식에 컬럼 이름이 반복적으로 등장하여 라인이 길어지고 있다. 이를 아래와 같이 축약된 별칭을 사용하여 연산식을 간결하게 표현할 수 있다.
 
 :smile: 권장 (_recommend_)
 ```sql
@@ -336,7 +337,7 @@ SELECT SQRT((cx - x) * (cx - x) + (cy - y) * (cy - y)) AS distince,
 ## 테이블 이름 짓기와 사용하기 (_Table Naming_)
 
 ### 테이블 이름 기본 가이드
-테이블 이름은 소문자 사용을 기본으로 하되 영구 테이블(_permanent table_)에 대한 팀내 명명 규칙이 별도로 정해져 있는 경우 그것을 우선한다.  
+테이블 이름은 소문자 사용을 기본으로 하되 영구 테이블(_permanent table_)에 대한 팀내 명명 규칙이 별도로 정해져 있는 경우 그것을 우선한다.
 
 다만, 임시테이블(_temporary table_)이나 공통 테이블 표현식(_CTEs_) 이름의 경우는 소문자를 사용하도록 한다. 테이블 이름은 대소문자를 구분한다.
 
@@ -346,11 +347,11 @@ SELECT SQRT((cx - x) * (cx - x) + (cy - y) * (cy - y)) AS distince,
 ■ Fully Qualified Table Name (FQTN)
 
 > '_완전하게 한정된 테이블 이름_ 또는 _정규화된 테이블 이름_'의 의미는 그 이름을 가지고 실행컨텍스트와 상관없이 유일하게 테이블를 특정할 수 있다는 말이다.
-> 예를 들어,  `customer.devices` 라는 _일부 한정된 테이블 이름_ 을 사용하는 경우 쿼리를 실행시키는 프로젝트에 따라서 각기 다른 `customer.devices` 테이블에 접근이 될 수 있다.
+> 예를 들어,  `customer.devices` 라는 _일부 한정된 테이블 이름_ 을 사용하는 경우 쿼리가 실행되는 프로젝트에 따라 각기 다른 `customer.devices` 테이블에 접근될 수 있다.
 
 BigQuery로 DWH(Data Ware House)를 구축하는 경우 데이터가 저장된 프로젝트와 BigQuery Job을 실행시켜주는 프로젝트가 다를 수 있기 때문에 실행컨텍스트의 영향을 받지 않도록 정규화된 형태의 테이블 이름을 사용하도록 한다. 테이블 이름에 프로젝트 명을 생략하는 경우 BigQuery Job 이 수행되고 있는 프로젝트 이름을 암묵적으로 사용한다.
 
-이외에, 단일 문장(_single statement_)의 쿼리를 실행하는 경우가 아닌 BigQuery 스크립트(_script_)로 복수의 문장(_multiple statements_)을 실행하는 경우에는 GCP Project 이름에 포함된 dash(-)가 뺄셈 등의 다른 의미로 해석이 되지 않도록 _정규화된 테이블 이름_ 을 backtick(`)을 사용하여 감싸준다.  
+이외에, 단일 문장(_single statement_)의 쿼리를 실행하는 경우가 아닌 BigQuery 스크립트(_script_)로 복수의 문장(_multiple statements_)을 실행하는 경우에는 GCP Project 이름에 포함된 dash(-)가 뺄셈 등의 다른 의미로 해석이 되지 않도록 _정규화된 테이블 이름_ 을 backtick(`)을 사용하여 감싸준다.
 
 이때 dash가 포함된 프로젝트 이름만 backtick으로 감싸주어도 오류가 발생하지는 않으나 FQTN 전체를 backtick을 감싸주어 의미적으로 하나의 단위임을 명시적으로 나타내도록 한다.
 
@@ -360,7 +361,11 @@ SELECT * FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
 ```
 :disappointed: 기피 (_avoid_)
 ```sql
-SELECT * FROM `bigquery-public-data`.austin_bikeshare.bikeshare_stations
+SELECT * FROM `bigquery-public-data.austin_bikeshare`.bikeshare_stations
+-- or
+SELECT * FROM `bigquery-public-data.austin_bikeshare`.`bikeshare_stations`
+-- or
+SELECT * FROM `bigquery-public-data`.`austin_bikeshare`.`bikeshare_stations`
 ```
 
 별표(`*`)를 포함하는 와일드카드(_wildcard_) 테이블 이름도 backtick(`)으로 감싸주어야 한다.
@@ -375,16 +380,49 @@ SELECT max
 ;
 ```
 
+■ 주의
+
+테이블 이름이 따옴표로 묶인 식별자(quoted identifier)인 경우 참조(reference)시 묶음 단위로 사용해야 한다. 여러 테이블을 다루는 JOIN 구문에서 아래와 같이 테이블을 참조할 경우 에러가 발생한다.
+
+```sql
+-- Error
+SELECT *
+  FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
+  JOIN `bigquery-public-data.san_francisco.bikeshare_trips`
+    ON bikeshare_stations.station_id = bikeshare_trips.start_station_id
+```
+>Unrecognized name: bikeshare_stations
+
+이는 FQTN 전체가 따옴표로 묶인 식별자여서 하나의 묶음으로 참조되어야 하고 묶음 안의 테이블 이름을 따로 꺼내 사용할 수 없기 때문이다.
+
+FQTN 전체를 참조하는 아래 쿼리는 정상 수행되나 보기에 좋은 코드는 아니다.
+
+```sql
+-- working but looks ugly
+SELECT *
+  FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
+  JOIN `bigquery-public-data.san_francisco.bikeshare_trips`
+    ON `bigquery-public-data.austin_bikeshare.bikeshare_stations`.station_id =
+       `bigquery-public-data.san_francisco.bikeshare_trips`.start_station_id
+```
+
+이런 경우 테이블 별칭(alias)를 사용하여 따옴표로 묶인 FQTN 이 아닌 별칭을 참조하도록 하여 테이블 이름 짓기 지침을 따르면서도 간결함을 유지할 수 있다.
+```sql
+SELECT *
+  FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations` s
+  JOIN `bigquery-public-data.san_francisco.bikeshare_trips` t
+    ON s.station_id = t.start_station_id
+```
 ----
 ## 문장 구조화 하기 (_Statement Structure_)
 
-SQL 문법에 정의된 키워드들과 앞서의 명명 규칙에 의해서 지어진 이름들을 사용하여 각 구절을 기술하고 이를 블럭처럼 쌓아 문장으로 구조화해 보도록 한다.
+SQL 문법에 정의된 키워드들과 앞서의 명명 규칙에 의해 지어진 이름을 사용하여 각 구절을 기술하고 이를 블럭처럼 쌓아 문장으로 구조화해 보도록 한다.
 
 ### SELECT 컬럼 리스트
 SQL의 가장 기본적인 `SELECT` 문장의 컬럼 리스트는 아래의 지침에 따라 작성한다.
-- `SELECT *` 로 전체 컬럼을 가져오기 보다는 필요한 컬럼만을 `SELECT` 리스트에 열거하도록 한다.
 - `SELECT` 리스트에 등장하는 컬럼이 복수개일 경우 한 라인에 하나씩 작성하는 것을 기본으로 한다.
-- 
+- `SELECT *` 로 전체 컬럼을 가져오기 보다는 필요한 컬럼만을 `SELECT` 리스트에 열거하도록 한다.
+
 ```sql
 SELECT station_id,
        name,
@@ -393,6 +431,12 @@ SELECT station_id,
        longitude,
   FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
 ```
+- 일부 컬럼을 제외한 전체 컬럼이 필요한 경우는 **EXCEPT** 구문을 활용한다.
+```sql
+SELECT * EXCEPT(latitude, longitude)
+  FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
+```
+
 - 의미적으로 관련이 있거나 시야 범위내에서 한 눈에 읽히고 이해될 수 있다면 80자를 넘지 않는 선에서 하나의 라인에 복수의 컬럼들을 기술할 수 있다.
 - 주석을 사용하여 컬럼의 의미를 부연 설명할 수 있다.
 - 마지막 컬럼명의 뒤에 콤마(,)를 추가한다.
@@ -483,7 +527,6 @@ SELECT station_id
 
 이외에 범용 프로그래밍 언어나 동적(_dynamic_) SQL을 사용하여 `SELECT` 문의 컬럼 리스트를 자동 생성할 때 뒤따르는 쉼표를 사용할 경우 리스트의 마지막 컬럼에 쉼표가 생략되도록 예외 처리할 필요가 없어 구현 로직이 단순해지는 장점이 있다.
 
-
 #### 컬럼 순서 관례 (_column order conventions_)
 - 기본키(PK, Primary Key)에 해당하는 컬럼명을 먼저 위치시킨다.
 - (optional) 파티션된 테이블 사용시 파티션 컬럼명은 마지막에 위치시킨다. 운영중에 스키마 변경으로 인한 컬럼 추가시는 예외가 된다.
@@ -492,17 +535,17 @@ SELECT station_id
 ### FROM 절
 `FROM` 절에는 테이블 또는 이에 상응하는 서브쿼리가 위치하게 된다. 서브쿼리에 대한 대한 스타일은 다음 장에서 다시 언급하도록 한다.
 
-- `FROM` 절은 `SELECT` 리스트의 다음 라인에 위치하며 테이블 이름은 `FROM` 키워드 다음에 이어서 기술한다.
+- `FROM` 절은 `SELECT` 리스트의 다음 라인에 위치하며 테이블 이름, 서브쿼리 혹은 **UNNEST**와 같은 테이블 함수 이름이 `FROM` 키워드에 이어 작성된다.
 - `FROM` 키워드는 `SELECT` 키워드에 오른쪽 정렬(right-aligned)이 되도록 위치시킨다.
 
 #### 영구 테이블 이름과 임시 테이블 이름 (_permanent and temporary table name_)
-- `FROM` 키워드 다음에 등장하는 테이블 이름으로는 영구 테이블(_permanent table_)과 임시 테이블(_temporary table_) 이름 또는 CTE(_common table expression_) 구문에 의해 정의된 이름을 사용할 수 있다. 
+- `FROM` 키워드 다음에 등장하는 테이블 이름으로는 영구 테이블(_permanent table_)과 임시 테이블(_temporary table_) 이름 또는 CTE(_common table expression_) 구문에 의해 정의된 이름을 사용할 수 있다.
 - 영구 테이블 이름은 `FQTN` 형식을 사용하며 임시 테이블이나 CTE 이름은 `snake_case` 형식을 사용한다.
-- 임시 테이블이나 CTE 이름은 테이블의 사용목적이 명확히 들어나도록 상세하게 작성한다.
+- 임시 테이블이나 CTE 이름은 테이블의 사용목적이 명확히 들어나도록 작성한다.
 
 ``` sql
--- Permanent Table 
-SELECT * 
+-- Permanent Table
+SELECT *
   FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`;
 ```
 ```sql
@@ -515,7 +558,7 @@ SELECT * FROM tmp_table;
 -- CTEs - named subquery
 WITH cte_name AS ( -- snake_case 규칙에 따라 기술
   SELECT ... -- 왼쪽 두칸 들여쓰기를 한다.
-    FROM ... 
+    FROM ...
 )
 SELECT * FROM cte_name;
 ```
@@ -542,7 +585,7 @@ SELECT *
            name,
            status,
       FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
-  )
+  ) -- 닫는 괄호는 쌍이 되는 여는 괄호의 키워드 시작점과 라인을 맞춘다.
 ```
 
 본 가이드에서 `from_style_#2` 를 선호하는 이유는 아래와 같다. 우선 위의 쿼리를 `JOIN`을 이용하여 확장해 보도록 하자.
@@ -581,13 +624,13 @@ SELECT *
 `from_style_#1` 은 동일한 수준(level or depth)에 위치한 두 서브쿼리 `a`, `b`의 들여쓰기가 서로 달라져 있다. 반면에 `from_style_#2` 은 두 서브쿼리가 동일한 들여쓰기를 유지하면서 동시에 테이블 별칭(alias)을 라인의 끝이 아닌 앞쪽에 위치함으로써 `ON`절에서 시선을 크게 이동시키지 않고서도 확인 가능하다.
 
 ### WHERE 절
-`WHERE` 절에는 결과셋(result set)에 남겨질 열(row)들을 선택할 조건을 기술한다. `WHERE` 절의 조건은 아래의 내용에 따라 작성한다.
+`WHERE` 절에는 `FROM` 절의 결과를 필터링하기 위한 조건을 기술한다. `WHERE` 절은 아래의 가이드에 따라 작성한다.
 
 - 비교 연산자의 앞 뒤로 공백을 두도록 한다.
 - 비동등연산자는 `!=`와 `<>` 모두 사용가능하다. [SQL-1999](http://web.cecs.pdx.edu/~len/sql1999.pdf)에서는 `<>`를 표준으로 정의하고 있다.
-- 조건절은 `AND`와 `OR` 논리 연산자에 의해 복수개가 연결(_chaining_)될 수 있다. 
+- 조건절은 `AND`와 `OR` 논리 연산자에 의해 복수개가 연결(_chaining_)될 수 있다.
 - 복수개의 조건을 기술하는 경우는 하나의 라인에 하나의 조건을 기술하는 것을 기본으로 하되 연관된 조건의 경우에는 80자를 넘지 않는 선에서 하나의 라인에 같이 작성 가능하다.
-- `AND`와 `OR` 논리 연산자는 `WHERE` 키워드에 오른쪽 정렬이 되도록 한다.
+- `AND`와 `OR` 논리 연산자는 `WHERE` 키워드에 오른쪽 정렬이 되도록 한다.  단, 혼용되어 사용되는 경우는 [논리 연산자의 혼용 (_mixed logical operators_)](#논리-연산자의-혼용-mixed-logical-operators) 가이드를 따른다.
 - `BETWEEN`이나 `IN` 연산자를 사용하여 복수개의 조건을 묶을 수 있는 경우는 연산자를 사용하여 조건을 간결하게 표현한다.
 
 ```sql
@@ -597,7 +640,7 @@ SELECT station_id,
        latitude, longitude,
   FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
  WHERE status = 'active'
-   AND latitude > 135.0   -- AND 로 조건 연결 
+   AND latitude > 135.0   -- AND 로 조건 연결
 ;
 ```
 
@@ -618,7 +661,7 @@ SELECT station_id,
   FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
  WHERE status = 'active'
    AND (latitude > 135.0 OR
-        longitude > 80.0) 
+        longitude > 80.0)
    AND ...
 ;
 -- 또는, 최상위 조건들을 OR로 묶고 세부조건을 AND로 묶는 경우
@@ -629,7 +672,7 @@ SELECT station_id,
   FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
  WHERE status = 'active'
     OR (latitude > 135.0 AND longitude > 80.0) -- 의미단위로 묶어서 한 줄에 표현
-    OR ...    
+    OR ...
 ```
 ```sql
 SELECT *
@@ -648,8 +691,8 @@ SELECT *
 
 - 집계함수에 의해서 만들어지는 지표(metric) 컬럼은 별칭(alias)를 사용하여 익명(_anonymous_)이 아닌 이름을 부여한다.
 - `GROUP BY` 리스트에는 컬럼의 별칭이나 컬럼 순서(ordinal position)를 사용할 수 있으므로 컬럼 순서를 우선해서 사용하도록 한다.
-- 특히, 기본컬럼에서 `CASE`문 등으로 유도된 컬럼(derived column)이 차원으로 사용되는 경우에는 반드시 별칭이나 컬럼 순서를 사용하여 코드가 반복되어 사용되지 않도록 한다.
-- `HAVING` 절에서는 컬럼 별칭 사용이 가능하다.
+- 특히, 기본컬럼에서 `CASE`문 등으로 계산된 컬럼(calculated column)이 차원으로 사용되는 경우에는 반드시 별칭이나 컬럼 순서를 사용하여 코드가 반복되어 사용되지 않도록 한다.
+- `HAVING` 은 집계결과를 필터링하기 위한 집계값의 조건을 기술하는 구문으로 **ORDER BY** 에서와 같이 컬럼 별칭 사용이 가능하다.
 
 ```sql
 SELECT station_id,
@@ -657,21 +700,21 @@ SELECT station_id,
        status,
        CASE
          WHEN ST_DISTANCE (
-                ST_GEOGPOINT(longitude, latitude), 
+                ST_GEOGPOINT(longitude, latitude),
                 ST_GEOGPOINT(-0.118092, 51.509865)
               ) < 7000000 THEN 'downtown'
          ELSE 'outskirt'
        END AS downtown_or_outskirt,
-       COUNT(1) AS cnt,    -- 집계함수에 의해 유도된 metric 컬럼에 별칭 부여
+       COUNT(1) AS cnt,    -- 집계함수에 의해 계산된 metric 컬럼에 별칭 부여
   FROM `bigquery-public-data.austin_bikeshare.bikeshare_stations`
  WHERE s.status IN ('active')
    AND s.latitude > 135.0
- GROUP BY 1, 2, 3
-HAVING cnt > 1
+ GROUP BY 1, 2, 3  -- ordinal position
+HAVING cnt > 1 -- column alias
 ;
 ```
 
-아래 예시처럼 `SELECT` 리스트에 유도된 컬럼을 정의하고 해당 컬럼을 차원으로 `GROUP BY` 집계를 하는 경우 `GROUP BY` 리스트에서 코드가 반복되어 문장이 길어지고 향후 유지보수가 어려워지게 된다.
+아래 예시처럼 `SELECT` 리스트에 계산된 컬럼을 정의하고 해당 컬럼을 차원으로 `GROUP BY` 집계를 하는 경우 `GROUP BY` 리스트에서 코드가 반복되어 문장이 길어지고 향후 유지보수가 어려워지게 된다.
 
 :smile: 권장 (_recommend_)
 ```sql
@@ -683,7 +726,7 @@ SELECT CASE
   FROM `bigquery-public-data.samples.natality`
  GROUP BY 1
 HAVING cnt > 1000
-; 
+;
 ```
 
 :disappointed: 기피 (_avoid_)
@@ -694,14 +737,15 @@ SELECT CASE
        END,
        COUNT(1) AS cnt,
   FROM `bigquery-public-data.samples.natality`
- GROUP BY CASE
-            WHEN is_male = TRUE THEN 'Male'
-            WHEN is_male = FALSE THEN 'Female'
-          END
+ GROUP BY
+       CASE
+         WHEN is_male = TRUE THEN 'Male'
+         WHEN is_male = FALSE THEN 'Female'
+       END
 ;
 ```
 
-또한, 유도된 컬럼을 지표로 사용하여 집계를 수행하는 경우에 컬럼 이름과 별칭을 혼동하여 사용할 경우 아래와 같이 원치 않는 결과가 만들어질 수 있으니 주의가 필요하다.
+또한, 계산된 컬럼을 지표로 사용하여 집계를 수행하는 경우에 컬럼 이름과 별칭을 혼동하여 사용할 경우 아래와 같이 원치 않는 결과가 만들어질 수 있으니 주의가 필요하다.
 
 ```sql
 DECLARE data ARRAY<STRUCT<region STRING,  amount INT64>> DEFAULT [
@@ -724,7 +768,11 @@ SELECT IF(d.region IN ('', 'NULL'), 'UNKNOWN', d.region) AS rgn,
 <br>
 
 ### 공통 테이블 표현식 _Common Table Expressions, CTEs_
-Common Table Expression 은 서브 쿼리 수행으로 만들어지는 임시 결과셋(result set)에 이름을 부여하여 다른 곳에서 참조할 수 있도록 하는 표현방식이다. 서브쿼리의 결과셋에 이름을 부여한 **Named Subquery** 인 셈이다. CTE는 복잡한 쿼리 구조를 간결하게 재구성하는데 핵심적인 역할을 한다.
+Common Table Expression 은 서브 쿼리에 이름을 부여하여 참조할 수 있도록 하는 표현방식이다. 서브쿼리에 이름을 부여한 **Named Subquery** 인 셈이다.
+
+서브쿼리는 정의된 해당 위치에서만 참조 가능하지만, 공통 테이블 표현식은 문장 내 여러 곳에서 반복적으로 참조될 수 있다.
+
+CTE는 복잡한 쿼리 구조를 간결하게 재구성하는데 핵심적인 역할을 한다.
 
 #### CTE 기본 가이드
 코드 내에 2단계를 넘어 중첩되는 서브쿼리가 존재하는 경우에는 서브쿼리를 CTE 구문으로  대체하여 전체 쿼리 구조가 적절한 깊이(2 depth)를 유지 하도록 한다.
@@ -737,9 +785,9 @@ CTE는 테이블 서브쿼리(_table subquery_)외에도 스칼라 서브쿼리(
 ```sql
 SELECT *
   FROM (
-    SELECT * 
+    SELECT *
       FROM (
-        SELECT * 
+        SELECT *
           FROM base_table
       ) AS first_subquery
   ) AS second_subquery
@@ -748,21 +796,21 @@ SELECT *
 :smile: 권장 _recommend_
 ```sql
 WITH first_subquery (  -- 가장 안쪽의 서브쿼리
-  SELECT *
-    FROM base_table
+SELECT *
+  FROM base_table
 ),
 second_subquery ( -- 상위 서브쿼리
   SELECT *
     FROM first_subquery
 )
-SELECT *
+SELECT *  -- 메인 쿼리
   FROM second_subquery
 ;
 ```
 
 `FROM` 절에 직접 서브쿼리를 사용하는 경우 아래쪽에 위치한 서브쿼리를 먼저 읽고 다시 위쪽의 쿼리를 읽어야 하는 반면, CTE를 사용하는 경우는 위에서부터 자연스럽게 아래로 코드 읽기가 가능한 장점이 있다.
 
-아래는 CTEs를 이용하여 유도된 컬럼이 반복되지 않도록 구조를 변경한 예시이다. 중복은 코드 길이를 증가시키고 유지보수를 어렵게 하기 때문에 서브쿼리나 CTE를 이용하여 코드가 반복되지 않도록 만드는 것이 좋다.
+아래는 CTEs를 이용하여 계산된 컬럼이 반복되지 않도록 구조를 변경한 예시이다. 중복은 코드 길이를 증가시키고 유지보수를 어렵게 하기 때문에 서브쿼리나 CTE를 이용하여 코드가 반복되지 않도록 만드는 것이 좋다.
 
 :disappointed: 기피 (_avoid_)
 ```sql
@@ -787,7 +835,7 @@ WITH stations (
          ) AS distance_from_city_centre_m
     FROM `bigquery-public-data.london_bicycles.cycle_stations`
 )
-SELECT * 
+SELECT *
   FROM stations
  WHERE distance_from_city_centre_m <= 500
  ORDER BY distance_from_city_centre_m
@@ -823,7 +871,7 @@ SELECT m.*,
 #### 상관 크로스 조인 (_correlated cross-join_)
 - [BigQuery Cross Joins](https://cloud.google.com/bigquery/docs/reference/standard-sql/query-syntax#cross_join)
 
-BigQuery의 배열을 평탄화(_flattening_)할 때 사용되는 `CROSS JOIN` 을 상관 크로스 조인이라하고 여기서의 상관(_correleated_)은 크로스 조인의 범위가 테이블 전체 행(_row_)이 아닌 배열을 보유하고 있는 행(_row_)에 엮여 국한된다는 의미이다.
+BigQuery의 배열을 평탄화(_flattening_) 한 후의 `CROSS JOIN` 을 상관 크로스 조인이라하고 여기서의 상관(_correleated_)은 크로스 조인의 범위가 테이블 전체 행(_row_)이 아닌 배열을 보유하고 있는 행(_row_)에 엮여 국한된다는 의미이다.
 
 아래 예시의 경우 `data` 테이블과 `y` 배열이 오라클 형식의 크로스 조인을 수행하고 있으나, 일반적인 크로스 조인 처럼 `y` 배열의 요소들이 `data` 테이블의 모든 행(_row_) 과 결합되어 m X n의 조합을 만들지 않고 `y`배열을 포함한 하나의 행과 1 X n(`y`배열크기) 의 한정된 조인 결과를 만들어 낸다.
 
@@ -835,11 +883,28 @@ WITH data AS (
   SELECT 2 AS w, 'b' AS x, ['R', 'S', 'T'] AS y
 )
 -- Comma Join --> data CROSS JOIN data.y 동일
-SELECT w, x, y_ FROM data, data.y y_  
-; 
+SELECT w, x, y_ FROM data, data.y y_
+;
 -- 위에서 메인 `SELECT` 문장은 아래 코드가 축약된 형태이다.
 -- UNNEST()를 생략하고 y 컬럼이름을 data.y로 한정시킴.
-SELECT w, x, y_ FROM data, UNNEST(y) y_  
+SELECT w, x, y_ FROM data, UNNEST(y) y_
+```
+
+아래는 **UNNEST**를 연쇄적으로 상관 조인을 수행하는 경우의 스타일 예시이다. ** FROM(서브쿼리)** 처럼 배열을 서브쿼리로 간주하고 비슷하게 스타일링하는 변형이 가능하다.
+```sql
+DECLARE rectangular_table ARRAY<STRUCT<A STRING, B STRING, C STRING>> DEFAULT [
+  ('1', '1', '1'),  ('2', 'other', '2'), ('TRUE', '3', '3'), ('4', '4', '4')
+];
+
+-- Style #1 - preferred
+SELECT SUM(SAFE_CAST(v AS FLOAT64)) AS `sum`
+  FROM UNNEST(rectangular_table) t,
+       UNNEST(REGEXP_EXTRACT_ALL(TO_JSON_STRING(t), r':"?([-0-9.]*)"?[,}]')) v
+;
+-- Style #2 -- UNNEST를 FROM과 유사하게 간주
+SELECT SUM(SAFE_CAST(v AS FLOAT64)) AS `sum`
+  FROM UNNEST(rectangular_table) t,
+UNNEST (REGEXP_EXTRACT_ALL(TO_JSON_STRING(t), r':"?([-0-9.]*)"?[,}]')) v
 ```
 
 ----
@@ -860,23 +925,24 @@ SELECT w, x, y_ FROM data, UNNEST(y) y_
 - 분석 함수와 `OVER` 키워드는 컬럼의 첫번째 라인에 위치시킨다.
 - `OVER ()` 구문내에 윈도우 프레임을 정의하는 구문이 길어지는 경우 줄바꿈을 한 후 각 구문을 하나의 라인에 기술한다.
 - 줄바꿈된 윈도우 프레임 정의 관련 키워드들은 윈도우 함수 이름을 기준으로 두 칸 들여쓰기를 한 후 왼쪽 정렬시킨다.
+- **select-list** 절에 윈도우 프레임 정의 구문 작성시 라인이 길어지므로 **WINDOW** 절에 정의하고 정의된 윈도우 프레임 이름을 사용한다.
 
 위의 스타일을 적용하여 작성한 코드 예시는 아래와 같다.
 
 - 첫번째 예시
 ```sql
 SELECT item, purchases, category,
-       SUM(purchases) OVER ( 
-         PARTITION BY category  -- 두 칸 들여쓰기 및 
+       SUM(purchases) OVER (
+         PARTITION BY category  -- 두 칸 들여쓰기 및
          ORDER BY purchases     -- PARTITION, ORDER 키워드 왼쪽 정렬
        ) AS total_purchases,    -- 분석함수 컬럼에 대한 별칭(alias)
 
-       SUM(purchases) OVER ( 
-         PARTITION BY category 
+       SUM(purchases) OVER (
+         PARTITION BY category
          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
        ) AS cumulative_purchases,
 
-       LAST_VALUE(item) OVER ( 
+       LAST_VALUE(item) OVER (
          PARTITION BY category ORDER BY purchases
          ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
        ) AS most_popular,
@@ -892,9 +958,23 @@ SELECT animal, population, category,
 ;
 ```
 
+**WINDOW** 구문을 사용한 스타일 예시이다. 이름을 가진 윈도우 프레임은 이어지는 윈도우 프레임에서 참조 가능하므로 반복되는 정의를 줄일 수 있다.
+```sql
+SELECT item, purchases, category,
+       SUM(purchases) OVER w1 AS total_purchases,
+       SUM(purchases) OVER w2 AS cumulative_purchases,
+       LAST_VALUE(item) OVER w3 AS most_popular,
+  FROM Produce
+WINDOW w0 AS (PARTITION BY category),
+       w1 AS (W0 ORDER BY purchases),
+       W2 AS (W0 ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+       W2 AS (W1 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+;
+```
+
 - 두 번째 예시
 ```sql
-SELECT name, 
+SELECT name,
        division,
        FORMAT_TIMESTAMP('%X', finish_time) AS finish_time,
        FORMAT_TIMESTAMP('%X', fastest_time) AS fastest_time,
@@ -907,12 +987,11 @@ SELECT name,
            ) AS fastest_time
       FROM finishers
 );
-
 ```
 
 ## User Defined Function
 
-BigQuery의 사용자 정의 함수는 `SQL`과 `JavaScript` 두 가지 언어로 작성 가능하다. 
+BigQuery의 사용자 정의 함수는 `SQL`과 `JavaScript` 두 가지 언어로 작성 가능하다.
 
 - 함수 본문(_function body_)을 작성할 때는 각 언어의 기본 스타일 가이드를 따른다.
 - `SQL` 언어로 작성시는 이 문서의 내용을 참고한다.
@@ -924,8 +1003,7 @@ BigQuery의 사용자 정의 함수는 `SQL`과 `JavaScript` 두 가지 언어�
 ```sql
 CREATE TEMP FUNCTION multiply_inputs(x FLOAT64, y FLOAT64)
 RETURNS FLOAT64
-LANGUAGE js AS 
-"""
+LANGUAGE js AS r"""
   return x * y;
 """;
 SELECT multiplyInputs(3, 5) as product;
@@ -935,17 +1013,19 @@ SELECT multiplyInputs(3, 5) as product;
 CREATE TEMP FUNCTION multiplyInputs(x FLOAT64, y FLOAT64) AS (
   x * y
 );
-SELECT multiplyInputs(3, 5) as product
+SELECT multiplyInputs(3, 5) as product;
 ```
 
 ``` sql
-CREATE TEMPORARY FUNCTION dayOfWeek(x TIMESTAMP) AS ( 
+CREATE TEMPORARY FUNCTION dayOfWeek(x TIMESTAMP) AS (
   ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   [ORDINAL(EXTRACT(DAYOFWEEK from x))]
 );
+
 CREATE TEMPORARY FUNCTION getDate(x TIMESTAMP) AS (
-  EXTRACT(DATE FROM x) 
+  EXTRACT(DATE FROM x)
 );
+
 WITH overnight_trips AS (
   SELECT duration, dayOfWeek(start_date) AS start_day
     FROM `bigquery-public-data.london_bicycles.cycle_hire`
@@ -958,13 +1038,13 @@ SQL UDF 에서 SELECT 문을 사용하는 경우 일반적인 스칼라 서브�
 
 ```sql
 CREATE OR REPLACE FUNCTION `jaeseok-park.fn.median` (arr ANY TYPE) AS ((
-  SELECT IF(MOD(ARRAY_LENGTH(arr), 2) = 0, 
+  SELECT IF(MOD(ARRAY_LENGTH(arr), 2) = 0,
             (arr[OFFSET(DIV(ARRAY_LENGTH(arr), 2) - 1)] +
              arr[OFFSET(DIV(ARRAY_LENGTH(arr), 2))] ) / 2,
-             
+
             arr[OFFSET(DIV(ARRAY_LENGTH(arr), 2))]
          ) AS median
-   FROM (SELECT ARRAY_AGG(x ORDER BY x) AS arr FROM UNNEST(arr) AS x)
+    FROM (SELECT ARRAY_AGG(x ORDER BY x) AS arr FROM UNNEST(arr) AS x)
 ));
 ```
 ----
@@ -995,9 +1075,9 @@ WITH variants AS (
 intervals AS (
   -- Define an inline table that uses five rows
   -- selected from silver-wall-555.TuteTable.hg19.
-  SELECT * 
+  SELECT *
     FROM UNNEST([
-           STRUCT<Gene STRING, Chr STRING, 
+           STRUCT<Gene STRING, Chr STRING,
                   gene_start INT64, gene_end INT64,
                   region_start INT64, region_end INT64>
            ('PRCC',  '1', 156736274, 156771607, 156636274, 156871607),
@@ -1025,12 +1105,12 @@ gene_variants AS (
     JOIN intervals i
       ON v.reference_name = i.Chr
      AND i.region_start <= v.start_position
-     AND i.region_end >= v.end_position 
+     AND i.region_end >= v.end_position
 )
 --
 -- And finally JOIN the variants in the regions of interest
 -- with annotations for rare variants.
-SELECT DISTINCT 
+SELECT DISTINCT
        Chr,
        annots.Start AS Start,
        Ref,
