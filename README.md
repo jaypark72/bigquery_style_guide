@@ -800,8 +800,8 @@ SELECT *
   FROM base_table
 ),
 second_subquery ( -- 상위 서브쿼리
-SELECT *
-  FROM first_subquery
+  SELECT *
+    FROM first_subquery
 )
 SELECT *  -- 메인 쿼리
   FROM second_subquery
