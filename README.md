@@ -73,9 +73,9 @@ SQL 문장은 아래와 같이 세분화할 수 있다. 각 문장에 대해 스
 
 본 가이드는 SELECT 문장의 구조를 구성하는 키워드는 대문자로 오른쪽 정렬을 시키고, 비즈니스 로직은 소문자를 위주로 왼쪽 정렬시켜 문장의 구조(Syntax)와 의미(Semantics)가 구분되도록 하고 있다.
 
-<br>
+
 ![select_structure](./images/styling_concept.png)
-<br>
+
 
 ```sql
 /* 각 절의 시작 키워드인 SELECT, FROM, LEFT, WHERE, GROUP 등을 오른쪽 정렬 */
